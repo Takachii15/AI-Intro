@@ -1,11 +1,10 @@
 # search.py
-# ---------
+# ------------------
 # Licensing Information:  You are free to use or extend these projects for
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
-# Attribution Information: The Pacman AI projects were developed at UC Berkeley.
+# Attribution Information: The Pacman AI projects were developed at UC Berkeley
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # Student side autograding was added by Brad Miller, Nick Hay, and
@@ -19,9 +18,10 @@ Pacman agents (in searchAgents.py).
 
 import util
 
+
 class SearchProblem:
     """
-    This class outlines the structure of a search problem, but doesn't implement
+    This class outlines the structure of a search problem, but doesn't implemen
     any of the methods (in object-oriented terminology: an abstract class).
 
     You do not need to change anything in this class, ever.
@@ -67,7 +67,8 @@ class SearchProblem:
           action: action taken at state.
           next_state: next Search state after taking action.
 
-        For a given state, this should return the cost of the (s, a, s') transition.
+        For a given state, this should return the cost of
+        the (s, a, s') transition.
         """
         util.raiseNotDefined()
 
@@ -76,7 +77,8 @@ class SearchProblem:
           state: Search state
           action: action taken at state
 
-        For a given state, this should return the next state after taking action from state.
+        For a given state, this should return the next state
+        after taking action from state.
         """
         util.raiseNotDefined()
 
@@ -89,11 +91,13 @@ class SearchProblem:
         """
         util.raiseNotDefined()
 
+
 class Node:
     def __init__(self, state, parent, action):
         self.state = state
         self.parent = parent
         self.action = action
+
 
 class CostNode:
     def __init__(self, state, parent, action, fcost):
@@ -101,6 +105,7 @@ class CostNode:
         self.parent = parent
         self.action = action
         self.fcost = fcost
+
 
 def tinyMazeSearch(problem):
     """
@@ -110,17 +115,17 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
 
 
 def depthFirstSearch(problem):
     frontier = util.Stack()
     visited = []
 
-    frontier.push(Node(problem.getStartState(),None, None))
-    while frontier.isEmpty() == False:
+    frontier.push(Node(problem.getStartState(), None, None))
+    while frontier.isEmpty() is False:
         node = frontier.pop()
-        if problem.isGoalState(node.state) == True:
+        if problem.isGoalState(node.state) is True:
             actions = []
             while node.parent is not None:
                 actions.append(node.action)
@@ -131,16 +136,17 @@ def depthFirstSearch(problem):
         visited.append(node.state)
         for i in problem.expand(node.state):
             if i[0] not in visited:
-                frontier.push(Node(i[0], node, i[1] ))
+                frontier.push(Node(i[0], node, i[1]))
+
 
 def breadthFirstSearch(problem):
     frontier = util.Queue()
     visited = []
 
-    frontier.push(Node(problem.getStartState(),None, None))
-    while frontier.isEmpty() == False:
+    frontier.push(Node(problem.getStartState(), None, None))
+    while frontier.isEmpty() is False:
         node = frontier.pop()
-        if problem.isGoalState(node.state) == True:
+        if problem.isGoalState(node.state) is True:
             actions = []
             while node.parent is not None:
                 actions.append(node.action)
@@ -156,24 +162,24 @@ def breadthFirstSearch(problem):
             if i[0] not in visited and i[0] not in frontierState:
                 frontier.push(Node(i[0], node, i[1]))
 
+
 def nullHeuristic(state, problem=None):
-    """
-    A heuristic function estimates the cost from the current state to the nearest
-    goal in the provided SearchProblem.  This heuristic is trivial.
-    """
     return 0
 
 # TODO: Implement heuristic cost concept to code
 
-# f(n) = g(n) + h(n) 
+# f(n) = g(n) + h(n)
+# implement something
+
+
 def aStarSearch(problem, heuristic=nullHeuristic):
     frontier = util.PriorityQueue()
     visited = []
 
-    frontier.push(CostNode(problem.getStartState(), None, None, None), None)
-    while frontier.isEmpty() == False:
+    frontier.push(CostNode(problem.getStartState(), None, None, 0), 0)
+    while frontier.isEmpty() is False:
         node = frontier.pop()
-        if problem.isGoalState(node.state) == True:
+        if problem.isGoalState(node.state) is True:
             actions = []
             while node.parent is not None:
                 actions.append(node.action)
@@ -181,22 +187,20 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             actions.reverse()
             return actions
 
-        if (node.state in visited):
-            continue
+        if (node.state not in visited):
+            visited.append(node.state)
+            for i in problem.expand(node.state):
+                frontierState = []
+                for j in frontier.heap:
+                    frontierState.append(j[0])
+                cost = i[2] + node.fcost
+                fcost = cost + heuristic(i[0], problem)
+                if i[0] not in visited and i[0] not in frontierState:
+                    # print(fcost)
+                    frontier.update(CostNode(i[0], node, i[1], fcost), fcost)
 
-        visited.append(node.state)
-        for i in problem.expand(node.state):
-            frontierState = []
-            for j in frontier.heap:
-                frontierState.append(j[0])
-            fcost = i[2] + heuristic(i[0], problem)
-            print(frontier.heap)
-            if i[0] not in visited and i[0] not in frontierState:
-                frontier.update(CostNode(i[0], node, i[1], fcost), fcost)
-            
 
 # Abbreviations
 bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
-

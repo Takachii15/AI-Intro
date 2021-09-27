@@ -16,6 +16,7 @@ from game import Agent
 from game import Directions
 import random
 
+
 class KeyboardAgent(Agent):
     """
     An agent controlled by the keyboard.
@@ -33,7 +34,7 @@ class KeyboardAgent(Agent):
         self.index = index
         self.keys = []
 
-    def getAction( self, state):
+    def getAction(self, state):
         from graphicsUtils import keys_waiting
         from graphicsUtils import keys_pressed
         keys = list(keys_waiting()) + list(keys_pressed())
