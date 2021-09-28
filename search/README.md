@@ -5,6 +5,7 @@ Terdiri dari 7 question yang akan di review secara mendalam di pembahasan selanj
 ## Q1 Depth First Search (Status: Done)
 
 > Difficulty : Medium (3/10)
+
 In this problem i make a new class to store all the data about the nodes
 (state, action, parent) and use an object from that class as format for nodes
 that were pushed to the stack. For the search algorithm i use stack as the data
@@ -26,6 +27,7 @@ that helped me finish the problem.
 ## Q2 Breadth First Search (Status: Done)
 
 > Difficulty : Medium (4.5/10)
+
 Basically in Breadth first search i used the same logic as DFS withs some tweaks,
 mainly the use of queue as the Data Structure to store the Node's Object and i added
 another list for storing frontier nodes, this list was to check wether the expanding
@@ -39,6 +41,7 @@ can be safely added to the frontier node
 ## Q3 A star Search (Status: Done with an exception)
 
 > Difficulty : Hard (6.5/10)
+
 In A star i used different implementation than before, in this problem i make a new
 class to to state the node's data with plus the total cost of it's node. The backtracking
 algorithm was basically the same than before but the different is how the agent search.
@@ -59,6 +62,7 @@ but the pacman is up and running and following the a star path.
 ## Q4 Corner's Problem (Status: Done)
 
 > Difficulty : Hard (8/10)
+
 In corner's problem at first i was confused to what to do, but after a long explanation
 from my friend i understand how it should works, so what i should edit is not the
 search method (because the search method used was BFS) but the Agent's function so
