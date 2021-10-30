@@ -95,12 +95,13 @@ def sentence1():
     (not A) if and only if ((not B) or C)
     (not A) or (not B) or C
     """
-    notA = Expr('~', Expr('A'))
-    notB = Expr('~', Expr('B'))
-    orAB = Expr('|', Expr('A'), Expr('B'))
-    ornAC = Expr('|', notA, notB, Expr('C'))
-    ornBC = Expr('|', notB, Expr('C'))
-    return Expr('&', orAB, Expr('<=>', notA, ornBC), ornAC)
+    c = Expr('C')
+    a = Expr('A')
+    b = Expr('B')
+    orAB = a | b
+    ornBC = ~b | c
+    orABC = disjoin(~a, ~b, c)
+    return conjoin(orAB, ~a % ornBC, orABC)
 
 
 def sentence2():
@@ -112,16 +113,14 @@ def sentence2():
     (not (B and (not C))) implies A
     (not D) implies C
     """
-    notB = Expr('~', 'B')
-    notD = Expr('~', 'D')
-    notC = Expr('~', 'C')
-    orBD = Expr('|', 'B', 'D')
-    nandBD = Expr('&', notB, notD)
-    nandBC = Expr('~', Expr('&', Expr('B'), notC))
-    forwDC = Expr('>>', notD, Expr('C'))
-    return Expr(
-        '&', Expr('<=>', Expr('C'), orBD), Expr('>>', Expr('A'), nandBD),
-        Expr('>>', nandBC, Expr('A')), forwDC)
+    a = Expr('A')
+    b = Expr('B')
+    c = Expr('C')
+    d = Expr('D')
+    orBD = disjoin(b, d)
+    nanBD = conjoin(~b, ~d)
+    nanBC = conjoin(b, ~c)
+    return conjoin(c % orBD, a >> nanBD, ~nanBC >> a, ~d >> c)
 
 
 def sentence3():
@@ -143,12 +142,11 @@ def sentence3():
     pacAlive1 = PropSymbolExpr("PacmanAlive[1]")
     pacBorn = PropSymbolExpr("PacmanBorn[0]")
     pacKill = PropSymbolExpr("PacmanKilled[0]")
-    nandAliveBorn = Expr('~', Expr('&', pacAlive, pacBorn))
-    nandAliveKill = Expr('&', pacAlive, Expr('~', pacKill))
-    nanAliveBorn = Expr('&', Expr('~', pacAlive), pacBorn)
-    return Expr(
-        '&', Expr('<=>', pacAlive1, Expr('|', nandAliveKill, nanAliveBorn)),
-        nandAliveBorn, pacBorn)
+    andAliveBorn = conjoin(pacAlive, pacBorn)
+    nandAliveKill = conjoin(pacAlive, ~pacKill)
+    nanAliveBorn = conjoin(~pacAlive, pacBorn)
+    orAliveKillBorn = disjoin(nandAliveKill, nanAliveBorn)
+    return conjoin(pacAlive1 % orAliveKillBorn, ~andAliveBorn, pacBorn)
 
 
 def modelToString(model):
@@ -170,10 +168,6 @@ def modelToString(model):
 
 
 def findModel(sentence):
-    """
-    Given a propositional logic sentence (i.e. a Expr instance), returns a
-    satisfying model if one exists. Otherwise, returns False.
-    """
     return pycoSAT(to_cnf(sentence))
 
 
@@ -196,9 +190,7 @@ def atLeastOne(literals):
     >>> print(pl_true(atleast1,model2))
     True
     """
-    "*** BEGIN YOUR CODE HERE ***"
-    raise NotImplementedError
-    "*** END YOUR CODE HERE ***"
+    return disjoin(literals)
 
 
 def atMostOne(literals):
@@ -207,9 +199,10 @@ def atMostOne(literals):
     CNF (conjunctive normal form) that represents the logic that at most one of
     the expressions in the list is true.
     """
-    "*** BEGIN YOUR CODE HERE ***"
-    raise NotImplementedError
-    "*** END YOUR CODE HERE ***"
+    list = []
+    for i in itertools.combinations(literals, 2):
+        list.append(disjoin(~i[0], ~i[1]))
+    return conjoin(list)
 
 
 def exactlyOne(literals):
@@ -218,9 +211,9 @@ def exactlyOne(literals):
     CNF (conjunctive normal form)that represents the logic that exactly one of
     the expressions in the list is true.
     """
-    "*** BEGIN YOUR CODE HERE ***"
-    raise NotImplementedError
-    "*** END YOUR CODE HERE ***"
+    atMost = atMostOne(literals)
+    atLeast = atLeastOne(literals)
+    return conjoin(atMost, atLeast)
 
 
 def extractActionSequence(model, actions):
