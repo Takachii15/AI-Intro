@@ -342,11 +342,22 @@ def pacphysics_axioms(t, all_coords, non_outer_wall_coords):
         - Pacman takes exactly one action at timestep t.
     """
     pacphysics_sentences = []
-
-    "*** BEGIN YOUR CODE HERE ***"
-    raise NotImplementedError
-    "*** END YOUR CODE HERE ***"
-
+    time = []
+    only_sentences = []
+    # temp = []
+    for i in all_coords:
+        wallPos = PropSymbolExpr(wall_str, i[0], i[1])
+        pacPos = PropSymbolExpr(pacman_str, i[0], i[1], t)
+        nanPac = wallPos >> ~pacPos
+        pacphysics_sentences.append(nanPac)
+    for j in non_outer_wall_coords:
+        pacPos1 = PropSymbolExpr(pacman_str, j[0], j[1], t)
+        only_sentences.append(pacPos1)
+    one = exactlyOne(only_sentences)
+    pacphysics_sentences.append(one)
+    for k in DIRECTIONS:
+        time.append(PropSymbolExpr(k, t))
+    pacphysics_sentences.append(exactlyOne(time))
     return conjoin(pacphysics_sentences)
 
 
@@ -379,10 +390,18 @@ def check_location_satisfiability(x1_y1, x0_y0, action0, action1, problem):
     # We know which coords are walls:
     map_sent = [PropSymbolExpr(wall_str, x, y) for x, y in walls_list]
     KB.append(conjoin(map_sent))
-
-    "*** BEGIN YOUR CODE HERE ***"
-    raise NotImplementedError
-    "*** END YOUR CODE HERE ***"
+    KB.append(PropSymbolExpr(pacman_str, x0, y0, 0))
+    KB.append(pacphysics_axioms(0, all_coords, non_outer_wall_coords))
+    KB.append(PropSymbolExpr(action0, 0))
+    KB.append(allLegalSuccessorAxioms(1, walls_grid, non_outer_wall_coords))
+    KB.append(pacphysics_axioms(1, all_coords, non_outer_wall_coords))
+    KB.append(PropSymbolExpr(action1, 1))
+    return (
+        findModel(
+            conjoin(conjoin(KB), ~PropSymbolExpr(pacman_str, x1, y1, 1))),
+        findModel(
+            conjoin(conjoin(KB), PropSymbolExpr(pacman_str, x1, y1, 1)))
+    )
 
 
 def positionLogicPlan(problem):
@@ -404,12 +423,29 @@ def positionLogicPlan(problem):
     actions = ['North', 'South', 'East', 'West']
     KB = []
 
-    "*** BEGIN YOUR CODE HERE ***"
-    raise NotImplementedError
-    "*** END YOUR CODE HERE ***"
+    KB.append(PropSymbolExpr(pacman_str, x0, y0, 0))
+    for t in range(50):
+        pacPos = []
+        for i in non_wall_coords:
+            pacPos.append(PropSymbolExpr(pacman_str, i[0], i[1], t))
+        KB.append(exactlyOne(pacPos))
+        condition = findModel(
+            conjoin(conjoin(KB), PropSymbolExpr(pacman_str, xg, yg, t)))
+        print(condition)
+        if condition:
+            if len(KB) != 0:
+                return extractActionSequence(condition, actions)
+        actionList = []
+        for j in actions:
+            actionList.append(PropSymbolExpr(j, t))
+        KB.append(exactlyOne(actionList))
+        for j in non_wall_coords:
+            KB.append(
+                pacmanSuccessorStateAxioms(j[0], j[1], t+1, walls))
 
 
 def foodLogicPlan(problem):
+
     """
     Given an instance of a FoodPlanningProblem, return a list of actions that
     help Pacman
@@ -431,10 +467,39 @@ def foodLogicPlan(problem):
     actions = ['North', 'South', 'East', 'West']
 
     KB = []
+    # foodList = []
 
-    "*** BEGIN YOUR CODE HERE ***"
-    raise NotImplementedError
-    "*** END YOUR CODE HERE ***"
+    KB.append(PropSymbolExpr(pacman_str, x0, y0, 0))
+    for foodLoc in food:
+        KB.append(PropSymbolExpr(food_str, foodLoc[0], foodLoc[1], 0))
+
+    for t in range(50):
+        pacPos = []
+        for i in non_wall_coords:
+            pacPos.append(PropSymbolExpr(pacman_str, i[0], i[1], t))
+        KB.append(exactlyOne(pacPos))
+        foodList = []
+        for foodLoc in food:
+            foodList.append(
+                PropSymbolExpr(food_str, foodLoc[0], foodLoc[1], t))
+        condition = findModel(conjoin(conjoin(KB), ~disjoin(foodList)))
+        if condition:
+            if len(KB) != 0:
+                return extractActionSequence(condition, actions)
+        actionList = []
+        for action in actions:
+            actionList.append(PropSymbolExpr(action, t))
+        KB.append(exactlyOne(actionList))
+        for j in non_wall_coords:
+            pacLoc = PropSymbolExpr(pacman_str, j[0], j[1], t)
+            foodLoc = PropSymbolExpr(food_str, j[0], j[1], t)
+            foodLoc1 = PropSymbolExpr(food_str, j[0], j[1], t+1)
+            KB.append(
+                disjoin(conjoin(pacLoc, foodLoc, ~foodLoc1),
+                        conjoin(pacLoc, ~foodLoc, ~foodLoc1),
+                        conjoin(~pacLoc, foodLoc, foodLoc1),
+                        conjoin(~pacLoc, ~foodLoc, ~foodLoc1))
+                )
 
 
 # Helpful Debug Method
