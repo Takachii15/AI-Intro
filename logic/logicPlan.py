@@ -444,6 +444,7 @@ def positionLogicPlan(problem):
                 pacmanSuccessorStateAxioms(j[0], j[1], t+1, walls))
 
 
+# DONE: Q5
 def foodLogicPlan(problem):
 
     """
@@ -500,7 +501,9 @@ def foodLogicPlan(problem):
                         conjoin(~pacLoc, foodLoc, foodLoc1),
                         conjoin(~pacLoc, ~foodLoc, ~foodLoc1))
                 )
-
+            KB.append(
+                pacmanSuccessorStateAxioms(j[0], j[1], t+1, walls))
+            
 
 # Helpful Debug Method
 def visualize_coords(coords_list, problem):
@@ -647,6 +650,7 @@ def SLAMSuccessorAxioms(t, walls_grid, non_outer_wall_coords):
     return conjoin(all_xy_succ_axioms)
 
 
+# TODO: Q6
 def localization(problem, agent):
     '''
     problem: a LocalizationProblem instance
@@ -667,13 +671,17 @@ def localization(problem, agent):
 
     possible_locs_by_timestep = []
     KB = []
+    for walls in walls_list:
+        KB.append(PropSymbolExpr(wall_str, walls[0], walls[1]))
+    for nonwall in non_outer_wall_coords:
+        KB.append(~PropSymbolExpr(wall_str, nonwall[0], nonwall[1]))
+    for t in range(agent.num_timesteps):
+        KB.append(pacphysics_axioms(t, all_coords, non_outer_wall_coords))
 
-    "*** BEGIN YOUR CODE HERE ***"
-    raise NotImplementedError
-    "*** END YOUR CODE HERE ***"
     return possible_locs_by_timestep
 
 
+# TODO: Q7
 def mapping(problem, agent):
     '''
     problem: a MappingProblem instance
@@ -713,6 +721,7 @@ def mapping(problem, agent):
     return known_map_by_timestep
 
 
+# TODO: Q8
 def slam(problem, agent):
     '''
     problem: a SLAMProblem instance
