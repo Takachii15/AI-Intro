@@ -431,7 +431,6 @@ def positionLogicPlan(problem):
         KB.append(exactlyOne(pacPos))
         condition = findModel(
             conjoin(conjoin(KB), PropSymbolExpr(pacman_str, xg, yg, t)))
-        print(condition)
         if condition:
             if len(KB) != 0:
                 return extractActionSequence(condition, actions)
@@ -503,7 +502,7 @@ def foodLogicPlan(problem):
                 )
             KB.append(
                 pacmanSuccessorStateAxioms(j[0], j[1], t+1, walls))
-            
+
 
 # Helpful Debug Method
 def visualize_coords(coords_list, problem):
